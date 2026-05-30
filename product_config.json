@@ -1,0 +1,16 @@
+{
+  "_comment": "O'z IT maxsulotingiz haqida ma'lumot. Email draftlari shu ma'lumot asosida yoziladi.",
+  "product_name": "Mening IT Maxsulotim",
+  "product_description": "Biznes jarayonlarni avtomatlashtirish uchun veb-platforma",
+  "product_benefits": [
+    "Vaqtni 40% tejash",
+    "Xatoliklarni kamaytirish",
+    "Hisobotlarni avtomatik yaratish"
+  ],
+  "target_industries": ["IT", "Savdo", "Konsalting", "Ishlab chiqarish", "Logistika"],
+  "company_name": "Mening Kompaniyam",
+  "website": "https://meningmaxsulotim.uz",
+  "contact_email": "sotuv@meningmaxsulotim.uz",
+  "pricing_model": "Oyiga $199 dan boshlanadi",
+  "unique_selling_point": "O'zbekiston bozoriga moslashtirilgan yagona yechim"
+}

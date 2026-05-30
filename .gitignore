@@ -1,0 +1,25 @@
+# Secrets
+.env
+
+# Database
+*.db
+*.db-wal
+*.db-shm
+
+# Python
+venv/
+__pycache__/
+*.pyc
+
+# Generated prospect lists / local tooling
+clients_*.csv
+clients_*.md
+client_hunter.py
+PUL_TOPISH_REJASI.md
+GO_TO_MARKET_KIT.md
+
+# OS
+.DS_Store
+
+# Claude Code local settings
+.claude/

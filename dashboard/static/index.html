@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sales Agent Dashboard v1.0</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: #f0f2f5;
+  color: #1a1a2e;
+  font-size: 14px;
+}
+.top-bar {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  color: white;
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.top-bar h1 { font-size: 20px; font-weight: 600; }
+.top-bar .status-badge {
+  background: #00b894;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+}
+.container { max-width: 1440px; margin: 0 auto; padding: 16px; }
+
+/* Stats */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.stat-card {
+  background: white;
+  border-radius: 10px;
+  padding: 16px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+.stat-card .number { font-size: 28px; font-weight: 700; color: #2d3436; }
+.stat-card .label { font-size: 12px; color: #636e72; margin-top: 4px; }
+
+/* Filters */
+.filters-bar {
+  background: white;
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+.filters-bar input, .filters-bar select {
+  padding: 8px 12px;
+  border: 1px solid #dfe6e9;
+  border-radius: 6px;
+  font-size: 13px;
+  background: white;
+}
+.filters-bar input { flex: 1; min-width: 200px; }
+.filters-bar select { min-width: 130px; }
+.filters-bar .btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.btn-primary { background: #0984e3; color: white; }
+.btn-success { background: #00b894; color: white; }
+.btn-warning { background: #fdcb6e; color: #2d3436; }
+.btn-danger { background: #d63031; color: white; }
+.btn-outline { background: transparent; border: 1px solid #dfe6e9; color: #636e72; }
+.btn-sm { padding: 6px 12px; font-size: 12px; }
+
+/* Table */
+.table-wrap {
+  background: white;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+table { width: 100%; border-collapse: collapse; }
+th {
+  background: #f8f9fa;
+  padding: 12px 10px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 12px;
+  color: #636e72;
+  border-bottom: 2px solid #dfe6e9;
+  white-space: nowrap;
+}
+td {
+  padding: 10px;
+  border-bottom: 1px solid #f1f1f1;
+  font-size: 13px;
+}
+tr:hover { background: #f8f9fa; }
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+}
+.badge-green { background: #00b89420; color: #00b894; }
+.badge-yellow { background: #fdcb6e30; color: #b7950b; }
+.badge-red { background: #d6303120; color: #d63031; }
+.badge-blue { background: #0984e320; color: #0984e3; }
+.badge-gray { background: #dfe6e9; color: #636e72; }
+
+/* Modal */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+}
+.modal-overlay.active { display: flex; }
+.modal {
+  background: white;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 640px;
+  max-height: 85vh;
+  overflow-y: auto;
+  padding: 24px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+}
+.modal h2 { margin-bottom: 16px; font-size: 18px; }
+.modal textarea {
+  width: 100%;
+  min-height: 180px;
+  padding: 12px;
+  border: 1px solid #dfe6e9;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  resize: vertical;
+}
+.modal input[type="text"] {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #dfe6e9;
+  border-radius: 8px;
+  font-size: 14px;
+  margin-bottom: 12px;
+}
+.modal-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+  justify-content: flex-end;
+}
+
+/* Bottom actions */
+.bottom-bar {
+  background: white;
+  border-radius: 10px;
+  padding: 16px;
+  margin-top: 16px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.bottom-bar .left { display: flex; gap: 8px; align-items: center; }
+
+/* Checkbox */
+.lead-checkbox { width: 18px; height: 18px; cursor: pointer; }
+.clickable { cursor: pointer; color: #0984e3; text-decoration: none; }
+.clickable:hover { text-decoration: underline; }
+
+/* Pipeline modal */
+.pipeline-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.spinner {
+  width: 16px; height: 16px;
+  border: 2px solid #dfe6e9;
+  border-top-color: #0984e3;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+}
+.pagination button {
+  padding: 6px 12px;
+  border: 1px solid #dfe6e9;
+  border-radius: 6px;
+  background: white;
+  cursor: pointer;
+}
+.pagination button:disabled { opacity: 0.5; cursor: default; }
+
+.toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: #2d3436;
+  color: white;
+  padding: 12px 20px;
+  border-radius: 8px;
+  z-index: 2000;
+  animation: fadeInUp 0.3s ease;
+  display: none;
+}
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+</style>
+</head>
+<body>
+<div class="top-bar">
+  <h1>Sales Agent Tizimi</h1>
+  <div style="display:flex;align-items:center;gap:16px">
+    <span style="font-size:12px;opacity:0.7" id="productNameDisplay">IT Maxsulot</span>
+    <span class="status-badge" id="pipelineStatusBadge">● Tayyor</span>
+  </div>
+</div>
+
+<div class="container">
+  <!-- Stats -->
+  <div class="stats-grid" id="statsGrid">
+    <div class="stat-card"><div class="number" id="statTotal">0</div><div class="label">Jami leadlar</div></div>
+    <div class="stat-card"><div class="number" id="statResearched">0</div><div class="label">Researched</div></div>
+    <div class="stat-card"><div class="number" id="statQualified">0</div><div class="label">Qualified (75+)</div></div>
+    <div class="stat-card"><div class="number" id="statValidated">0</div><div class="label">Validated</div></div>
+    <div class="stat-card"><div class="number" id="statChecked">0</div><div class="label">Tanlangan</div></div>
+    <div class="stat-card"><div class="number" id="statSent">0</div><div class="label">Yuborilgan</div></div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters-bar">
+    <input type="text" id="searchInput" placeholder="Qidirish (ism, kompaniya, email)..." oninput="loadLeads()">
+    <select id="statusFilter" onchange="loadLeads()">
+      <option value="">Barcha statuslar</option>
+      <option value="pending">Pending</option>
+      <option value="research_complete">Research done</option>
+      <option value="approved">Approved</option>
+      <option value="validated">Validated</option>
+      <option value="email_draft_ready">Email ready</option>
+      <option value="sent">Sent</option>
+      <option value="zaxira">Zaxira</option>
+      <option value="rejected">Rejected</option>
+    </select>
+    <select id="validationFilter" onchange="loadLeads()">
+      <option value="">Validation</option>
+      <option value="passed">Passed</option>
+      <option value="failed">Failed</option>
+    </select>
+    <select id="industryFilter" onchange="loadLeads()">
+      <option value="">Barcha sohalar</option>
+    </select>
+    <select id="sourceFilter" onchange="loadLeads()">
+      <option value="">Barcha manbalar</option>
+    </select>
+    <div style="display:flex;align-items:center;gap:8px">
+      <span style="font-size:12px;color:#636e72">Score:</span>
+      <input type="number" id="minScore" value="0" style="width:60px" onchange="loadLeads()">
+      <span>-</span>
+      <input type="number" id="maxScore" value="100" style="width:60px" onchange="loadLeads()">
+    </div>
+    <button class="btn btn-outline btn-sm" onclick="selectAll()">Hammasini tanlash</button>
+    <button class="btn btn-outline btn-sm" onclick="selectAll75()">75+ tanlash</button>
+    <button class="btn btn-outline btn-sm" onclick="selectValidated()">Validated tanlash</button>
+    <button class="btn btn-outline btn-sm" onclick="deselectAll()">Bekor qilish</button>
+  </div>
+
+  <!-- Table -->
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:32px"><input type="checkbox" id="selectAllCheckbox" onchange="toggleSelectAll()"></th>
+          <th>Ism / Lavozim</th>
+          <th>Kompaniya</th>
+          <th>Soha</th>
+          <th style="width:60px">Score</th>
+          <th style="width:80px">Validation</th>
+          <th>Email draft</th>
+          <th>Manba</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="leadsTableBody">
+        <tr><td colspan="9" style="text-align:center;padding:32px;color:#636e72">Ma'lumot yuklanmoqda...</td></tr>
+      </tbody>
+    </table>
+    <div class="pagination" id="pagination">
+      <button onclick="prevPage()" id="prevBtn">← Oldingi</button>
+      <span id="pageInfo">1 / 1</span>
+      <button onclick="nextPage()" id="nextBtn">Keyingi →</button>
+    </div>
+  </div>
+
+  <!-- Bottom bar -->
+  <div class="bottom-bar">
+    <div class="left">
+      <button class="btn btn-success" onclick="sendSelected()" id="sendBtn">Yuborish (0)</button>
+      <button class="btn btn-primary" onclick="exportExcel()">Excel yuklab olish</button>
+      <button class="btn btn-warning" onclick="openNewSearchModal()">Yangi qidiruv</button>
+    </div>
+    <div class="pipeline-status">
+      <span id="pipelineStatusText">Pipeline: -</span>
+    </div>
+  </div>
+</div>
+
+<!-- Email Edit Modal -->
+<div class="modal-overlay" id="emailModal">
+  <div class="modal">
+    <h2>Email draftni tahrirlash</h2>
+    <input type="text" id="emailSubjectInput" placeholder="Email mavzusi">
+    <textarea id="emailBodyInput" placeholder="Email matni..."></textarea>
+    <input type="hidden" id="editLeadId">
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="resetDraft()">Agent draftini qayta tiklash</button>
+      <button class="btn btn-outline" onclick="closeEmailModal()">Bekor qilish</button>
+      <button class="btn btn-primary" onclick="saveEmailDraft()">Saqlash</button>
+    </div>
+  </div>
+</div>
+
+<!-- New Search Modal -->
+<div class="modal-overlay" id="searchModal">
+  <div class="modal">
+    <h2>Yangi qidiruv</h2>
+    <input type="text" id="newQueryInput" placeholder="Qidiruv so'rovi (masalan: IT kompaniyalar rahbarlari Toshkent)" style="margin-bottom:8px">
+    <input type="text" id="newIndustryInput" placeholder="Soha (ixtiyoriy)" style="margin-bottom:8px">
+    <input type="text" id="newCityInput" placeholder="Shahar (ixtiyoriy)">
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeSearchModal()">Bekor qilish</button>
+      <button class="btn btn-primary" onclick="startNewSearch()">Boshlash</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+let currentPage = 0;
+const PAGE_SIZE = 50;
+let leadsData = [];
+let totalLeads = 0;
+let pollInterval = null;
+
+async function api(url, opts = {}) {
+  try {
+    const res = await fetch(url, {
+      headers: {'Content-Type': 'application/json'},
+      ...opts,
+    });
+    if (!res.ok) {
+      const errText = await res.text().catch(() => '');
+      throw new Error(`HTTP ${res.status}: ${errText || res.statusText}`);
+    }
+    return await res.json();
+  } catch (err) {
+    if (err.message.includes('Failed to fetch')) {
+      toast('Server bilan bog\'lanib bo\'lmadi. Uptalik serverni tekshiring.');
+    }
+    throw err;
+  }
+}
+
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.style.display = 'block';
+  setTimeout(() => el.style.display = 'none', 3000);
+}
+
+async function loadStats() {
+  try {
+    const stats = await api('/api/stats');
+    document.getElementById('statTotal').textContent = stats.total_leads || 0;
+    document.getElementById('statResearched').textContent = stats.researched || 0;
+    document.getElementById('statQualified').textContent = stats.qualified_75 || 0;
+    document.getElementById('statValidated').textContent = stats.validated || 0;
+    document.getElementById('statChecked').textContent = stats.checked || 0;
+    document.getElementById('statSent').textContent = stats.sent || 0;
+    if (stats.last_run_status) {
+      document.getElementById('pipelineStatusText').textContent = `Pipeline: ${stats.last_run_status}`;
+      const badge = document.getElementById('pipelineStatusBadge');
+      if (stats.last_run_status === 'running') {
+        badge.textContent = '● Ishlayapti...';
+        badge.style.background = '#fdcb6e';
+      } else if (stats.last_run_status === 'finished') {
+        badge.textContent = '● Tayyor';
+        badge.style.background = '#00b894';
+      } else {
+        badge.textContent = '● Xato';
+        badge.style.background = '#d63031';
+      }
+    }
+  } catch(e) {}
+}
+
+async function loadFilters() {
+  try {
+    const ind = await api('/api/filters/industries');
+    const sel = document.getElementById('industryFilter');
+    sel.innerHTML = '<option value="">Barcha sohalar</option>' + ind.industries.map(i => `<option value="${i}">${i}</option>`).join('');
+    const src = await api('/api/filters/sources');
+    const sel2 = document.getElementById('sourceFilter');
+    sel2.innerHTML = '<option value="">Barcha manbalar</option>' + src.sources.map(s => `<option value="${s}">${s}</option>`).join('');
+  } catch(e) {}
+}
+
+async function loadLeads() {
+  const params = new URLSearchParams();
+  const search = document.getElementById('searchInput').value;
+  const status = document.getElementById('statusFilter').value;
+  const validation = document.getElementById('validationFilter').value;
+  const industry = document.getElementById('industryFilter').value;
+  const source = document.getElementById('sourceFilter').value;
+  const minScore = document.getElementById('minScore').value;
+  const maxScore = document.getElementById('maxScore').value;
+  if (search) params.set('search', search);
+  if (status) params.set('status', status);
+  if (validation) params.set('validation_status', validation);
+  if (industry) params.set('industry', industry);
+  if (source) params.set('source', source);
+  params.set('min_score', minScore);
+  params.set('max_score', maxScore);
+  params.set('limit', PAGE_SIZE);
+  params.set('offset', currentPage * PAGE_SIZE);
+
+  try {
+    const data = await api('/api/leads?' + params.toString());
+    leadsData = data.leads || [];
+    totalLeads = data.total || 0;
+    renderLeads();
+    renderPagination();
+  } catch(e) {
+    document.getElementById('leadsTableBody').innerHTML = '<tr><td colspan="9" style="text-align:center;padding:32px;color:#d63031">Xato: ' + e.message + '</td></tr>';
+  }
+}
+
+function renderLeads() {
+  const tbody = document.getElementById('leadsTableBody');
+  if (!leadsData.length) {
+    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:32px;color:#636e72">Hech qanday lead topilmadi</td></tr>';
+    return;
+  }
+  tbody.innerHTML = leadsData.map(l => {
+    const scoreClass = l.score >= 75 ? 'badge-green' : l.score >= 50 ? 'badge-yellow' : 'badge-red';
+    const valClass = l.validation_status === 'passed' ? 'badge-green' : l.validation_status === 'failed' ? 'badge-red' : 'badge-gray';
+    const statusClass = l.status === 'sent' ? 'badge-green' : l.status === 'validated' ? 'badge-blue' : l.status === 'email_draft_ready' ? 'badge-blue' : l.status === 'zaxira' ? 'badge-yellow' : l.status === 'rejected' ? 'badge-red' : 'badge-gray';
+    return `<tr>
+      <td><input type="checkbox" class="lead-checkbox" data-id="${l.id}" ${l.checked ? 'checked' : ''} onchange="updateCheck(${l.id}, this.checked)"></td>
+      <td><strong>${esc(l.contact_person || 'Noma\'lum')}</strong><br><span style="font-size:11px;color:#636e72">${esc(l.position || '')}</span></td>
+      <td><a class="clickable" href="${esc(l.website || '#')}" target="_blank">${esc(l.company_name)}</a></td>
+      <td>${esc(l.industry || '-')}</td>
+      <td><span class="badge ${scoreClass}" style="font-size:13px;font-weight:700">${l.score}</span></td>
+      <td><span class="badge ${valClass}">${l.validation_status || '-'}</span></td>
+      <td><a class="clickable" onclick="openEmailModal(${l.id})">${l.email_subject ? esc(l.email_subject).substring(0, 40)+'...' : 'Draftni ko\'rish'}</a></td>
+      <td>${esc(l.source || '-')}</td>
+      <td><span class="badge ${statusClass}">${l.status}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+function esc(s) {
+  if (!s) return '';
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+function renderPagination() {
+  const totalPages = Math.ceil(totalLeads / PAGE_SIZE) || 1;
+  document.getElementById('pageInfo').textContent = `${currentPage + 1} / ${totalPages}`;
+  document.getElementById('prevBtn').disabled = currentPage === 0;
+  document.getElementById('nextBtn').disabled = currentPage >= totalPages - 1;
+}
+
+function prevPage() {
+  if (currentPage > 0) { currentPage--; loadLeads(); }
+}
+function nextPage() {
+  currentPage++; loadLeads();
+}
+
+function toggleSelectAll() {
+  const checked = document.getElementById('selectAllCheckbox').checked;
+  document.querySelectorAll('.lead-checkbox').forEach(cb => cb.checked = checked);
+  const ids = leadsData.map(l => l.id);
+  api('/api/leads/batch-check', {
+    method: 'POST',
+    body: JSON.stringify({ lead_ids: ids, checked: checked ? 1 : 0 }),
+  }).then(() => { loadStats(); updateSendBtn(); });
+}
+
+function selectAll() {
+  document.querySelectorAll('.lead-checkbox').forEach(cb => cb.checked = true);
+  const ids = leadsData.map(l => l.id);
+  api('/api/leads/batch-check', {
+    method: 'POST',
+    body: JSON.stringify({ lead_ids: ids, checked: 1 }),
+  }).then(() => { loadStats(); updateSendBtn(); });
+}
+
+function selectAll75() {
+  const ids = leadsData.filter(l => l.score >= 75).map(l => l.id);
+  document.querySelectorAll('.lead-checkbox').forEach(cb => {
+    cb.checked = ids.includes(parseInt(cb.dataset.id));
+  });
+  api('/api/leads/batch-check', {
+    method: 'POST', body: JSON.stringify({ lead_ids: ids, checked: 1 }),
+  }).then(() => { loadStats(); updateSendBtn(); });
+}
+
+function selectValidated() {
+  const ids = leadsData.filter(l => l.validation_status === 'passed').map(l => l.id);
+  document.querySelectorAll('.lead-checkbox').forEach(cb => {
+    cb.checked = ids.includes(parseInt(cb.dataset.id));
+  });
+  api('/api/leads/batch-check', {
+    method: 'POST', body: JSON.stringify({ lead_ids: ids, checked: 1 }),
+  }).then(() => { loadStats(); updateSendBtn(); });
+}
+
+function deselectAll() {
+  document.querySelectorAll('.lead-checkbox').forEach(cb => cb.checked = false);
+  const ids = leadsData.map(l => l.id);
+  api('/api/leads/batch-check', {
+    method: 'POST', body: JSON.stringify({ lead_ids: ids, checked: 0 }),
+  }).then(() => { loadStats(); updateSendBtn(); });
+}
+
+async function updateCheck(id, checked) {
+  await api(`/api/leads/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify({ checked: checked ? 1 : 0 }),
+  });
+  loadStats();
+  updateSendBtn();
+}
+
+function updateSendBtn() {
+  const count = document.querySelectorAll('.lead-checkbox:checked').length;
+  document.getElementById('sendBtn').textContent = `Yuborish (${count})`;
+}
+
+let currentEmailLeadId = null;
+async function openEmailModal(leadId) {
+  currentEmailLeadId = leadId;
+  const lead = await api(`/api/leads/${leadId}`);
+  document.getElementById('emailSubjectInput').value = lead.email_edited_subject || lead.email_subject || '';
+  document.getElementById('emailBodyInput').value = lead.email_edited || lead.email_draft || '';
+  document.getElementById('editLeadId').value = leadId;
+  document.getElementById('emailModal').classList.add('active');
+}
+
+function closeEmailModal() {
+  document.getElementById('emailModal').classList.remove('active');
+  currentEmailLeadId = null;
+}
+
+async function saveEmailDraft() {
+  const id = document.getElementById('editLeadId').value;
+  const subject = document.getElementById('emailSubjectInput').value;
+  const body = document.getElementById('emailBodyInput').value;
+  await api(`/api/leads/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify({ email_edited: body, email_edited_subject: subject }),
+  });
+  toast('Email draft saqlandi');
+  closeEmailModal();
+}
+
+async function resetDraft() {
+  const id = document.getElementById('editLeadId').value;
+  await api(`/api/leads/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify({ email_edited: null, email_edited_subject: null }),
+  });
+  const lead = await api(`/api/leads/${id}`);
+  document.getElementById('emailSubjectInput').value = lead.email_subject || '';
+  document.getElementById('emailBodyInput').value = lead.email_draft || '';
+  toast('Agent drafti tiklandi');
+}
+
+function openNewSearchModal() {
+  document.getElementById('searchModal').classList.add('active');
+}
+function closeSearchModal() {
+  document.getElementById('searchModal').classList.remove('active');
+}
+
+async function startNewSearch() {
+  const query = document.getElementById('newQueryInput').value;
+  if (!query) { toast('Iltimos, qidiruv so'rovini kiriting'); return; }
+  closeSearchModal();
+  const badge = document.getElementById('pipelineStatusBadge');
+  badge.textContent = '● Ishlayapti...';
+  badge.style.background = '#fdcb6e';
+  document.getElementById('pipelineStatusText').textContent = 'Pipeline: running...';
+  const result = await api('/api/pipeline/run', {
+    method: 'POST',
+    body: JSON.stringify({ query }),
+  });
+  toast('Pipeline boshlandi (ID: ' + result.pipeline_id + ')');
+  startPolling();
+}
+
+function startPolling() {
+  if (pollInterval) clearInterval(pollInterval);
+  pollInterval = setInterval(async () => {
+    const pipeline = await api('/api/pipeline/latest');
+    if (pipeline.status === 'finished' || pipeline.status === 'error') {
+      clearInterval(pollInterval);
+      pollInterval = null;
+      const badge = document.getElementById('pipelineStatusBadge');
+      if (pipeline.status === 'finished') {
+        badge.textContent = '● Tayyor';
+        badge.style.background = '#00b894';
+      } else {
+        badge.textContent = '● Xato';
+        badge.style.background = '#d63031';
+      }
+      document.getElementById('pipelineStatusText').textContent = `Pipeline: ${pipeline.status}`;
+      toast('Pipeline tugadi! ' + pipeline.total_leads + ' ta lead topildi.');
+      loadLeads();
+      loadStats();
+    }
+  }, 3000);
+}
+
+async function sendSelected() {
+  const checkedBoxes = document.querySelectorAll('.lead-checkbox:checked');
+  const ids = Array.from(checkedBoxes).map(cb => parseInt(cb.dataset.id));
+  if (!ids.length) { toast('Hech qanday lead tanlanmagan'); return; }
+  if (!confirm(`${ids.length} ta leadga yuborishni tasdiqlaysizmi?`)) return;
+  const result = await api('/api/send', {
+    method: 'POST',
+    body: JSON.stringify({ lead_ids: ids }),
+  });
+  toast(`${result.total_sent} ta yuborildi, ${result.total_errors} ta xato`);
+  loadLeads();
+  loadStats();
+}
+
+async function exportExcel() {
+  const minScore = document.getElementById('minScore').value;
+  const maxScore = document.getElementById('maxScore').value;
+  const status = document.getElementById('statusFilter').value;
+  window.location.href = `/api/export/excel?min_score=${minScore}&max_score=${maxScore}&status=${status}`;
+}
+
+async function loadProductName() {
+  try {
+    const res = await fetch('/api/product-info');
+    const data = await res.json();
+    document.getElementById('productNameDisplay').textContent = data.product_name || 'IT Maxsulot';
+  } catch(e) {}
+}
+
+// Init
+(async function init() {
+  await api('/api/init');
+  await loadProductName();
+  await loadFilters();
+  await loadLeads();
+  await loadStats();
+  // Check if pipeline is running
+  const pipeline = await api('/api/pipeline/latest');
+  if (pipeline.status === 'running') {
+    startPolling();
+  }
+})();
+</script>
+</body>
+</html>
