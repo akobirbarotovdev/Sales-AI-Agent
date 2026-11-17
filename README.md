@@ -61,8 +61,8 @@ returns control to the supervisor until all phases complete.
 ## Quick start
 
 ```bash
-git clone https://github.com/akobirbaratov1/sales-agent.git
-cd sales-agent
+git clone https://github.com/akobirbarotovdev/Sales-AI-Agent.git
+cd Sales-AI-Agent
 python3 -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
 
